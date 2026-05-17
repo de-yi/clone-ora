@@ -2,9 +2,14 @@
 
 Two kinds of renders:
   - render_subject: subject + saju + western chart (the static portrait)
-  - render_today:   today's 일진 + brief notable transits to the subject
+  - render_today:   today's day-energy + brief notable transits to the subject
 
 Keep these terse — they're for the model to *use*, not for the user to read.
+
+**English-first formatting.** The persona rule is English-only output with
+Korean/Chinese symbols in parens. If we feed the model Chinese-leading data,
+it tends to echo the same form back. So every pillar appears here as
+"Element Animal (symbols / Korean reading)" — English first.
 """
 
 from datetime import date, datetime
@@ -12,35 +17,43 @@ from zoneinfo import ZoneInfo
 
 from ora.charts.saju import (
     BRANCH_ELEMENT,
+    BRANCH_EN,
     BRANCH_KO,
+    ELEMENT_EN,
     ELEMENT_KO,
     SajuPillars,
     STEM_ELEMENT,
+    STEM_EN,
     STEM_KO,
     day_pillar_for,
 )
 from ora.charts.western import NatalChart
 
 
-def _ko(pillar: str) -> str:
-    if not pillar or len(pillar) < 2:
-        return pillar or ""
-    return f"{pillar} ({STEM_KO.get(pillar[0], '?')}{BRANCH_KO.get(pillar[1], '?')})"
+def _pillar(p: str | None) -> str:
+    """Format a pillar in English-first form: 'Yang Water Dragon (壬辰 / 임진)'."""
+    if not p or len(p) < 2:
+        return "unknown"
+    stem, branch = p[0], p[1]
+    return (
+        f"{STEM_EN.get(stem, stem)} {BRANCH_EN.get(branch, branch)} "
+        f"({p} / {STEM_KO.get(stem, '?')}{BRANCH_KO.get(branch, '?')})"
+    )
 
 
 def render_saju(s: SajuPillars) -> str:
     elements_line = " · ".join(
-        f"{el}({ELEMENT_KO[el]}) {s.elements[el]}"
+        f"{ELEMENT_EN[el]} {s.elements[el]}"
         for el in ("木", "火", "土", "金", "水")
     )
+    day_master_en = STEM_EN.get(s.day_master, s.day_master)
     return (
-        f"사주 four pillars:\n"
-        f"- 年柱 (year):  {_ko(s.year)}\n"
-        f"- 月柱 (month): {_ko(s.month)}\n"
-        f"- 日柱 (day):   {_ko(s.day)} — 일간 {s.day_master} ({STEM_KO.get(s.day_master, '?')}, "
-        f"{ELEMENT_KO[STEM_ELEMENT[s.day_master]]})\n"
-        f"- 時柱 (hour):  {_ko(s.hour) if s.hour else 'unknown (omitted)'}\n"
-        f"오행 balance: {elements_line}"
+        "Four pillars (사주):\n"
+        f"- Year:  {_pillar(s.year)}\n"
+        f"- Month: {_pillar(s.month)}\n"
+        f"- Day:   {_pillar(s.day)} — Day Master is {day_master_en} ({s.day_master})\n"
+        f"- Hour:  {_pillar(s.hour) if s.hour else 'unknown — no hour pillar'}\n"
+        f"Five-element balance: {elements_line}"
     )
 
 
@@ -69,7 +82,7 @@ def render_subject(
     western: NatalChart | None,
 ) -> str:
     header = (
-        f"**{display_name}** — born {birth_date}"
+        f"{display_name} — born {birth_date}"
         f"{' at ' + birth_time if birth_time else ' (time unknown)'}"
         f", {birth_place}"
     )
@@ -82,13 +95,14 @@ def render_subject(
 
 
 def render_today(when: date, tz: str = "Asia/Seoul") -> str:
-    """일진 for the given day. Western transits TODO — keep short for now."""
+    """Today's day-energy. Western transits TODO — keep short for now."""
     dt = datetime.combine(when, datetime.min.time(), tzinfo=ZoneInfo(tz))
     today_pillar = day_pillar_for(dt)
+    stem_el = ELEMENT_EN[STEM_ELEMENT[today_pillar[0]]]
+    branch_el = ELEMENT_EN[BRANCH_ELEMENT[today_pillar[1]]]
     return (
         f"Today ({when.isoformat()}, {tz}):\n"
-        f"- 일진 (day pillar): {_ko(today_pillar)} — "
-        f"stem element {ELEMENT_KO[STEM_ELEMENT[today_pillar[0]]]}, "
-        f"branch element {ELEMENT_KO[BRANCH_ELEMENT[today_pillar[1]]]}\n"
-        f"- Western transits: (not yet computed — TODO)"
+        f"- Day energy: {_pillar(today_pillar)} — "
+        f"{stem_el} stem on {branch_el} branch\n"
+        f"- Western transits: (not yet computed)"
     )

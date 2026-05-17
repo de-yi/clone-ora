@@ -33,6 +33,22 @@ BRANCH_ELEMENT = {
 }
 ELEMENT_KO = {"木": "목", "火": "화", "土": "토", "金": "금", "水": "수"}
 
+# English names — used by chart renderers so the LLM gets English-first context
+# and doesn't echo Chinese/Korean characters as the leading form in its output.
+STEM_EN = {
+    "甲": "Yang Wood", "乙": "Yin Wood",
+    "丙": "Yang Fire", "丁": "Yin Fire",
+    "戊": "Yang Earth", "己": "Yin Earth",
+    "庚": "Yang Metal", "辛": "Yin Metal",
+    "壬": "Yang Water", "癸": "Yin Water",
+}
+BRANCH_EN = {
+    "子": "Rat", "丑": "Ox", "寅": "Tiger", "卯": "Rabbit",
+    "辰": "Dragon", "巳": "Snake", "午": "Horse", "未": "Goat",
+    "申": "Monkey", "酉": "Rooster", "戌": "Dog", "亥": "Pig",
+}
+ELEMENT_EN = {"木": "Wood", "火": "Fire", "土": "Earth", "金": "Metal", "水": "Water"}
+
 
 @dataclass
 class SajuPillars:

@@ -4,7 +4,7 @@
 # WebSocket to Slack rather than receiving HTTP requests. One always-on VM
 # with a tiny volume for SQLite is enough.
 
-app = "clone-ora"
+app = "de-yi-clone-ora"
 primary_region = "nrt"   # Tokyo — closest Fly region to Korea
 
 [build]

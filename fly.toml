@@ -1,26 +1,33 @@
-# Fly.io config for ora.
+# fly.toml app configuration file generated for de-yi-clone-ora on 2026-05-17T19:34:47Z
 #
-# Socket Mode is outbound-only, so no [http_service] is needed — the bot opens a
-# WebSocket to Slack rather than receiving HTTP requests. One always-on VM
-# with a tiny volume for SQLite is enough.
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "de-yi-clone-ora"
-primary_region = "nrt"   # Tokyo — closest Fly region to Korea
+app = 'de-yi-clone-ora'
+primary_region = 'nrt'
 
 [build]
 
+[deploy]
+  strategy = 'immediate'
+
 [env]
-  ORA_DB_PATH = "/data/ora.db"
-  ORA_TIMEZONE = "Asia/Seoul"
-  ORA_DAILY_FORTUNE_HOUR = "9"
+  ORA_DAILY_FORTUNE_HOUR = '9'
+  ORA_DB_PATH = '/data/ora.db'
+  ORA_TIMEZONE = 'Asia/Seoul'
 
 [[mounts]]
-  source = "ora_data"
-  destination = "/data"
+  source = 'data'
+  destination = '/data'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
-
-[deploy]
-  strategy = "immediate"
+  size = 'shared-cpu-1x'
+  memory = '512mb'

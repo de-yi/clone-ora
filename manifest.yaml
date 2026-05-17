@@ -13,7 +13,7 @@
 
 display_information:
   name: ora
-  description: 사주 and Western astrology for clone. Daily fortunes in #ora, personal readings in DM.
+  description: "사주 and Western astrology for clone. Daily fortunes in #ora, personal readings in DM."
   background_color: "#1a1a2e"
 
 features:

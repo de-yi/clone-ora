@@ -1,0 +1,40 @@
+# clone — the company, as a chart subject
+#
+# clone is itself a first-class subject in ora's world. Daily fortune posts
+# read for *clone*, members ask follow-ups in thread, ora answers in clone's
+# context or in their own if they've shared birth data.
+
+kind: entity
+display_name: clone
+slack_user_id: null  # entities have no slack user; this is a sentinel record
+
+birth_date: "2026-02-19"
+birth_time: null  # unknown — see notes
+birth_tz: "Asia/Seoul"
+birth_place: "Seoul, South Korea"
+birth_lat: 37.5665
+birth_lon: 126.9780
+
+# Chart-art convention for unknown time:
+#   - Saju: use noon local solar time. Year/month/day pillars are reliable;
+#     hour pillar (시주) is omitted, not faked.
+#   - Western: use noon local time and compute a "solar chart" — planetary
+#     positions in correct signs, Ascendant + house cusps marked as
+#     UNRELIABLE and not displayed in readings unless time is refined.
+#
+# Refine when an actual incorporation timestamp is known (filing time, first
+# commit, first hire moment, founders' agreed birth moment).
+
+notes: |
+  Birth date confirmed by daeun on 2026-05-18. Time and place to be refined.
+  Until then ora reads clone as a three-pillar saju (year/month/day) and a
+  solar Western chart (no Ascendant).
+
+  Known so far without ephemeris:
+    - 사주 year pillar: 丙午 (병오 / Fire Horse) — 2026 is a 丙午 year
+    - 사주 month pillar: 庚寅 (경인) — Feb 19 falls in 寅月 (after 입춘 ≈ Feb 4,
+      before 경칩 ≈ Mar 5); month stem follows 五虎遁 rule for 丙 year → 庚寅
+    - 사주 day pillar: TO COMPUTE — requires ephemeris (run scripts/compute_chart.py)
+    - 사주 hour pillar: UNKNOWN (시주 omitted)
+    - Western Sun: Pisces (Sun enters Pisces ≈ Feb 18–19; verify with ephemeris)
+    - Western Ascendant: UNAVAILABLE (no time)

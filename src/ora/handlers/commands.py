@@ -1,0 +1,56 @@
+"""/ora slash command.
+
+Subcommands:
+  /ora              → same as /ora today
+  /ora today        → today's 일진 + brief read against clone
+  /ora me           → reading on the asker's chart (must have one on file)
+  /ora setup        → open birth-data modal (TODO)
+"""
+
+import logging
+
+from ora import reading, subjects
+
+logger = logging.getLogger(__name__)
+
+
+def handle_ora_command(ack, command, client, respond):
+    ack()
+    text = (command.get("text") or "").strip().lower()
+    user_id = command["user_id"]
+    user_name = command.get("user_name")
+    logger.info("/ora from %s: %r", user_id, text)
+
+    if text == "setup":
+        # TODO: open the /ora setup modal (Block Kit).
+        respond(
+            response_type="ephemeral",
+            text="Setup modal isn't wired yet. Tell me your birth date/time/place in DM for now and I'll record it manually. — ora",
+        )
+        return
+
+    if text == "me":
+        row = subjects.get_by_slack_id(user_id)
+        if not row:
+            respond(
+                response_type="ephemeral",
+                text="No chart on file for you yet. Use `/ora setup` (when it lands) or DM me your birth date/time/place. — ora",
+            )
+            return
+        response_text = reading.respond(
+            "Give me a short reading on my own chart — what's the shape of me, what should I know.",
+            surface="dm",
+            slack_user_id=user_id,
+            user_display_name=user_name,
+        )
+        respond(response_type="ephemeral", text=response_text)
+        return
+
+    # Default: /ora and /ora today both give today's reading against clone
+    response_text = reading.respond(
+        "Give a short reading on today for clone — the day's energy, what it asks of the company.",
+        surface="channel_mention",
+        slack_user_id=user_id,
+        user_display_name=user_name,
+    )
+    respond(response_type="ephemeral", text=response_text)

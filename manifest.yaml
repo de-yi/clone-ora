@@ -1,0 +1,56 @@
+# Slack app manifest for ora.
+#
+# To install:
+#   1. Go to https://api.slack.com/apps → Create New App → From manifest
+#   2. Choose the clone workspace
+#   3. Paste this YAML
+#   4. After creation: Install to workspace (grants the scopes below)
+#   5. OAuth & Permissions tab → copy Bot User OAuth Token (xoxb-...) → SLACK_BOT_TOKEN
+#   6. Basic Information → App-Level Tokens → Generate Token and Scopes
+#        scope: connections:write
+#        copy the xapp-... → SLACK_APP_TOKEN
+#   7. Invite @ora to #ora and set ORA_CHANNEL_ID to that channel's ID
+
+display_information:
+  name: ora
+  description: 사주 and Western astrology for clone. Daily fortunes in #ora, personal readings in DM.
+  background_color: "#1a1a2e"
+
+features:
+  bot_user:
+    display_name: ora
+    always_online: true
+
+  slash_commands:
+    - command: /ora
+      description: Talk to ora — setup, today's reading, or your own
+      usage_hint: "[setup | me | today]"
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read       # @ora in channels
+      - channels:history        # read channel messages where ora is invited
+      - channels:read           # channel metadata
+      - chat:write              # post messages
+      - commands                # slash command
+      - groups:history          # private channels (if invited)
+      - im:history              # read DMs
+      - im:read                 # DM metadata
+      - im:write                # open DMs and post
+      - users:read              # resolve display names / tz
+
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+      - user_huddle_changed
+  interactivity:
+    is_enabled: true            # required for slash commands and Block Kit modals
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false

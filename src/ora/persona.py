@@ -31,8 +31,8 @@ def stable_system_prompt() -> str:
 # we inject every call. Override `deep=True` to relax the limits.
 SURFACE_SHAPE = {
     "daily_post": (
-        "1–3 short sentences. Plus the date marker header. Punchy, public-facing, "
-        "characterful. Reads like a field note, not a horoscope."
+        "1–3 short sentences. Plus the date marker header. Casual, witty, "
+        "public-facing — like the funniest thing in the group chat that morning."
     ),
     "channel_mention": (
         "1–3 short sentences. A take, not a report. If the question is repetitive "
@@ -45,7 +45,7 @@ SURFACE_SHAPE = {
     ),
     "dm": (
         "2–4 short sentences. Slightly more room because it's private, but still "
-        "short. Don't lecture. If they want more, they'll ask."
+        "short and chatty. Don't lecture. If they want more, they'll ask."
     ),
     "huddle_thread": (
         "1–2 sentences max. A small drop-in, not a reading."

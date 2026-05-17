@@ -12,7 +12,7 @@ from ora.persona import RuntimeContext
 
 logger = logging.getLogger(__name__)
 
-FALLBACK = "Mm. The chart's there but I can't reach the words right now. Try me in a minute."
+FALLBACK = "okay, the chart's there but the words aren't reaching me right now. give it a minute and ping me again."
 
 
 def today_local() -> date:

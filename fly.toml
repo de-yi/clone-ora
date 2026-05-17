@@ -1,0 +1,26 @@
+# Fly.io config for ora.
+#
+# Socket Mode is outbound-only, so no [http_service] is needed — the bot opens a
+# WebSocket to Slack rather than receiving HTTP requests. One always-on VM
+# with a tiny volume for SQLite is enough.
+
+app = "clone-ora"
+primary_region = "nrt"   # Tokyo — closest Fly region to Korea
+
+[build]
+
+[env]
+  ORA_DB_PATH = "/data/ora.db"
+  ORA_TIMEZONE = "Asia/Seoul"
+  ORA_DAILY_FORTUNE_HOUR = "9"
+
+[[mounts]]
+  source = "ora_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[deploy]
+  strategy = "immediate"

@@ -64,24 +64,45 @@ ora
 - [x] Persona and canon written
 - [x] Project scaffold, deps pinned
 - [x] SQLite schema
-- [x] Persona / system-prompt loader
-- [x] Anthropic wrapper with prompt caching (PERSONA + REFERENCE cached)
-- [x] 사주 computation (`lunar-python`) — year/month/day pillars + hour if known, 일간, 오행 balance
-- [x] Western natal chart (`kerykeion`) — planetary placements; Ascendant + houses when birth time known
-- [x] Real Slack handlers: `@ora` mentions, DMs, `/ora today`, `/ora me`
+- [x] Persona / system-prompt loader with prompt caching
+- [x] 사주 computation (`lunar-python`)
+- [x] Western natal chart (`kerykeion`)
+- [x] Slack handlers: `@ora` mentions, DMs, `/ora today`, `/ora me`, `/ora setup` modal
+- [x] Daily fortune cron (APScheduler, idempotent per-day)
 - [x] Slack app manifest
-- [ ] `/ora setup` modal (Block Kit) — for now, add users manually via `subjects.upsert_with_charts(...)`
-- [ ] Daily fortune cron
+- [x] Dockerfile + fly.toml
 - [ ] DM thread continuity (last N messages → context)
 - [ ] Huddle hook (handler is stubbed; needs huddle → channel mapping)
-- [ ] Western transits to natal (today's chart placements vs. subject's natal)
-- [ ] Fly.io / Railway deploy
+- [ ] Western transits-to-natal computed properly (today's planet positions vs. subject's natal) — currently only the saju day-pillar appears in the runtime context
+- [ ] Geocoding birth place (currently defaults to Seoul coords)
 
 ## CLI scripts
 
 ```bash
 python -m ora.scripts.init    # init DB schema + load clone + compute charts
 ```
+
+## Deploying to Fly.io
+
+```bash
+# one-time setup
+fly launch --copy-config --no-deploy            # picks up fly.toml; reuse the existing app name or pick another
+fly volumes create ora_data --region nrt --size 1
+fly secrets set \
+  SLACK_BOT_TOKEN=xoxb-... \
+  SLACK_APP_TOKEN=xapp-... \
+  ANTHROPIC_API_KEY=sk-ant-... \
+  ORA_CHANNEL_ID=C0XXXXXX
+
+# deploy
+fly deploy
+fly logs        # tail
+```
+
+Notes:
+- Socket Mode means no inbound HTTP — `fly.toml` deliberately has no `[http_service]`. The bot opens a WebSocket out to Slack.
+- The SQLite DB lives on the mounted volume at `/data/ora.db` so restarts don't lose chart data.
+- Daily fortune fires at `ORA_DAILY_FORTUNE_HOUR` (default 9) in `ORA_TIMEZONE` (default Asia/Seoul). Override via `fly secrets set` or `[env]` in `fly.toml`.
 
 ## Useful Python REPL recipes
 

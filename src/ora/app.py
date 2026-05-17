@@ -6,7 +6,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from ora import config, db, subjects
-from ora.handlers import commands, dms, huddle, mentions
+from ora.handlers import commands, daily, dms, huddle, mentions, setup_modal
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,6 +25,7 @@ def build_app() -> App:
     app.event("message")(dms.handle_message)
     app.event("user_huddle_changed")(huddle.handle_huddle_changed)
     app.command("/ora")(commands.handle_ora_command)
+    app.view(setup_modal.CALLBACK_ID)(setup_modal.handle_submission)
 
     return app
 
@@ -40,6 +41,15 @@ def main() -> None:
     subjects.get_clone_id()
 
     app = build_app()
+
+    if config.ORA_CHANNEL_ID:
+        daily.start_scheduler(app.client)
+    else:
+        logger.warning(
+            "ORA_CHANNEL_ID not set — skipping daily-fortune scheduler. "
+            "Set it in .env to enable daily posts."
+        )
+
     logger.info("ora starting (Socket Mode)…")
     SocketModeHandler(app, config.SLACK_APP_TOKEN).start()
 

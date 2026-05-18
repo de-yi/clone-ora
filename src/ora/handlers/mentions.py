@@ -43,6 +43,7 @@ def handle_app_mention(event, say, client):
         slack_channel_id=channel_id,
         slack_thread_ts=thread_ts,
         slack_message_ts=event.get("ts"),
+        slack_client=client,
     )
 
     say(text=response, thread_ts=thread_ts)

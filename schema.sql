@@ -61,3 +61,15 @@ CREATE TABLE IF NOT EXISTS readings (
 CREATE INDEX IF NOT EXISTS idx_readings_subject ON readings(subject_id);
 CREATE INDEX IF NOT EXISTS idx_readings_thread  ON readings(slack_channel_id, slack_thread_ts);
 CREATE INDEX IF NOT EXISTS idx_readings_created ON readings(created_at);
+
+-- subject_memory: a small digested note ora maintains per subject.
+-- Rebuilt asynchronously by ora.memory after each reading. Used as runtime
+-- context — never shown to the asker.
+CREATE TABLE IF NOT EXISTS subject_memory (
+    subject_id      INTEGER PRIMARY KEY REFERENCES subjects(id) ON DELETE CASCADE,
+    digest          TEXT    NOT NULL,
+    generation      INTEGER NOT NULL DEFAULT 1,
+    last_reading_id INTEGER,                       -- max(readings.id) considered last rewrite
+    model           TEXT,
+    updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+);

@@ -47,6 +47,7 @@ def handle_ora_command(ack, command, client, respond):
             surface="dm",
             slack_user_id=user_id,
             user_display_name=user_name,
+            slack_client=client,
         )
         respond(response_type="ephemeral", text=response_text)
         return
@@ -57,5 +58,6 @@ def handle_ora_command(ack, command, client, respond):
         surface="channel_mention",
         slack_user_id=user_id,
         user_display_name=user_name,
+        slack_client=client,
     )
     respond(response_type="ephemeral", text=response_text)

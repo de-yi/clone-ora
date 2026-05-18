@@ -5,7 +5,7 @@ import logging
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-from ora import config, db, subjects
+from ora import config, db, health, subjects
 from ora.handlers import commands, daily, dms, huddle, mentions, setup_modal
 
 logging.basicConfig(
@@ -49,6 +49,11 @@ def main() -> None:
             "ORA_CHANNEL_ID not set — skipping daily-fortune scheduler. "
             "Set it in .env to enable daily posts."
         )
+
+    # Keep-alive HTTP endpoint so Fly's proxy/autoscaler sees the app as active.
+    # Socket Mode has no inbound HTTP, and Fly interprets "no inbound HTTP" as
+    # "idle" and stops the machine. Serving /health on :8080 prevents that.
+    health.start()
 
     logger.info("ora starting (Socket Mode)…")
     SocketModeHandler(app, config.SLACK_APP_TOKEN).start()

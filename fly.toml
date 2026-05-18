@@ -1,7 +1,12 @@
-# fly.toml app configuration file generated for de-yi-clone-ora on 2026-05-17T19:34:47Z
+# fly.toml app configuration file for de-yi-clone-ora
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
+# Socket Mode is outbound-only — the meaningful traffic is a WebSocket to Slack.
+# Fly's autoscaler would interpret the lack of inbound HTTP as "idle" and stop
+# the machine. To prevent that, the bot serves a minimal /health endpoint on
+# :8080 (see src/ora/health.py) so Fly's proxy has something to probe, AND we
+# explicitly set auto_stop_machines = false and min_machines_running = 1.
 
 app = 'de-yi-clone-ora'
 primary_region = 'nrt'
@@ -16,17 +21,17 @@ primary_region = 'nrt'
   ORA_DB_PATH = '/data/ora.db'
   ORA_TIMEZONE = 'Asia/Seoul'
 
+[http_service]
+  internal_port = 8080
+  force_https = false
+  auto_stop_machines = false
+  auto_start_machines = false
+  min_machines_running = 1
+  processes = ['app']
+
 [[mounts]]
   source = 'data'
   destination = '/data'
-
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
 
 [[vm]]
   size = 'shared-cpu-1x'

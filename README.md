@@ -18,9 +18,11 @@ data/clone.yaml             ← clone-the-company as a chart subject
 src/ora/
   app.py                    ← entry point, Slack bolt app, Socket Mode
   config.py                 ← env vars
-  db.py                     ← SQLite (subjects, saju_pillars, natal_chart, readings)
+  db.py                     ← SQLite (subjects, saju_pillars, natal_chart, readings, subject_memory)
   persona.py                ← assembles system prompt with runtime context
   llm.py                    ← Anthropic client (Sonnet 4.6 default, Opus 4.7 for deep)
+  slack_history.py          ← pulls recent thread/DM messages for runtime context
+  memory.py                 ← per-subject digested memory (async Haiku rewrites)
   handlers/
     mentions.py             ← @ora in channel
     dms.py                  ← 1:1 DMs
@@ -71,7 +73,7 @@ ora
 - [x] Daily fortune cron (APScheduler, idempotent per-day)
 - [x] Slack app manifest
 - [x] Dockerfile + fly.toml
-- [ ] DM thread continuity (last N messages → context)
+- [x] Thread/DM continuity (last N messages → context) + per-subject digested memory (`/ora memory`, `/ora forget`)
 - [ ] Huddle hook (handler is stubbed; needs huddle → channel mapping)
 - [ ] Western transits-to-natal computed properly (today's planet positions vs. subject's natal) — currently only the saju day-pillar appears in the runtime context
 - [ ] Geocoding birth place (currently defaults to Seoul coords)

@@ -58,6 +58,17 @@ def get_digest(subject_id: int | None) -> str | None:
         return None
 
 
+def forget(subject_id: int) -> bool:
+    """Delete a subject's digest. Idempotent. Returns True if a row was removed."""
+    try:
+        with db.cursor() as cur:
+            cur.execute("DELETE FROM subject_memory WHERE subject_id=?", (subject_id,))
+            return cur.rowcount > 0
+    except Exception:
+        logger.exception("forget failed for subject_id=%s", subject_id)
+        return False
+
+
 def schedule_update(subject_id: int | None) -> None:
     """Queue an async digest rewrite for this subject. No-op if subject is unknown."""
     if subject_id is None:

@@ -39,7 +39,9 @@ def handle_message(event, say, client):
         slack_user_id=user_id,
         user_display_name=_display_name(client, user_id) if user_id else None,
         slack_channel_id=channel_id,
+        slack_thread_ts=event.get("thread_ts"),
         slack_message_ts=event.get("ts"),
+        slack_client=client,
     )
 
     say(response)

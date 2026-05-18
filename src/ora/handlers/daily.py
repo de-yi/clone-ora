@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ora import config, db, llm, subjects
+from ora import config, db, llm, memory, subjects
 from ora.charts import render
 from ora.persona import RuntimeContext
 
@@ -46,10 +46,12 @@ def post_daily_fortune(slack_client) -> None:
 
     clone_md = subjects.clone_chart_markdown()
     today_md = render.render_today(today, tz=config.ORA_TIMEZONE)
+    clone_id = subjects.get_clone_id()
     runtime = RuntimeContext(
         today=today,
         surface="daily_post",
         clone_chart=f"{clone_md}\n\n{today_md}",
+        clone_memory=memory.get_digest(clone_id),
     )
 
     prompt = (
@@ -73,6 +75,9 @@ def post_daily_fortune(slack_client) -> None:
         logger.info("posted daily fortune for %s", today)
     except Exception:
         logger.exception("failed to post daily fortune to %s", config.ORA_CHANNEL_ID)
+        return
+
+    memory.schedule_update(clone_id)
 
 
 def start_scheduler(slack_client) -> BackgroundScheduler:

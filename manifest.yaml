@@ -24,7 +24,7 @@ features:
   slash_commands:
     - command: /ora
       description: Talk to ora — setup, today's reading, or your own
-      usage_hint: "[setup | me | today]"
+      usage_hint: "[setup | me | today | memory | forget]"
       should_escape: false
 
 oauth_config:

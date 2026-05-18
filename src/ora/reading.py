@@ -6,7 +6,7 @@ import logging
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from ora import config, llm, subjects
+from ora import config, llm, memory, slack_history, subjects
 from ora.charts import render
 from ora.persona import RuntimeContext
 
@@ -57,12 +57,17 @@ def respond(
     slack_channel_id: str | None = None,
     slack_thread_ts: str | None = None,
     slack_message_ts: str | None = None,
+    slack_client=None,
     deep: bool | None = None,
 ) -> str:
     """Build runtime context, call ora, return the text response (or a fallback).
 
     `deep=None` (default) auto-detects from the message text. Pass deep=True/False
     explicitly to override.
+
+    Pass `slack_client` when running from a Slack handler so ora can pull the
+    recent thread/DM transcript for context. Omit for surfaces with no prior
+    conversation (e.g. the daily fortune cron).
     """
     if deep is None:
         deep = _wants_deep(user_message)
@@ -70,6 +75,19 @@ def respond(
     user_chart = user_chart_block(slack_user_id) if slack_user_id else None
     user_subject_row = subjects.get_by_slack_id(slack_user_id) if slack_user_id else None
     user_subject_id = user_subject_row["id"] if user_subject_row else None
+    clone_id = subjects.get_clone_id()
+
+    thread_context = None
+    if slack_client and slack_channel_id:
+        thread_context = slack_history.fetch_thread_context(
+            slack_client,
+            channel_id=slack_channel_id,
+            thread_ts=slack_thread_ts,
+            surface=surface,
+            current_message_ts=slack_message_ts,
+            thread_limit=config.THREAD_HISTORY_LIMIT,
+            dm_limit=config.DM_HISTORY_LIMIT,
+        )
 
     runtime = RuntimeContext(
         today=today_local(),
@@ -77,12 +95,14 @@ def respond(
         clone_chart=clone_chart_block(),
         user_name=user_display_name,
         user_chart=user_chart,
-        thread_context=None,  # TODO: fetch last N from conversations.history
+        thread_context=thread_context,
+        user_memory=memory.get_digest(user_subject_id),
+        clone_memory=memory.get_digest(clone_id),
         deep=deep,
     )
 
     try:
-        return llm.read(
+        text = llm.read(
             user_message,
             runtime,
             deep=deep,
@@ -94,3 +114,7 @@ def respond(
     except Exception:
         logger.exception("LLM call failed; returning fallback")
         return FALLBACK
+
+    memory.schedule_update(user_subject_id)
+    memory.schedule_update(clone_id)
+    return text

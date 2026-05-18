@@ -59,6 +59,17 @@ DEEP_SHAPE = (
 )
 
 
+MEMORY_HINT = (
+    "This is context you've built up over time. Draw on it sparingly — don't "
+    "recite it, don't make them feel surveilled. Reference, not script."
+)
+
+CLONE_MEMORY_HINT = (
+    "Your accumulated sense of what comes up in this workspace. Use it for "
+    "read, not recital."
+)
+
+
 @dataclass
 class RuntimeContext:
     today: date
@@ -67,6 +78,8 @@ class RuntimeContext:
     user_name: str | None = None
     user_chart: str | None = None      # markdown summary, or None if no chart on file
     thread_context: str | None = None  # last N messages, formatted
+    user_memory: str | None = None     # digest of what ora knows about the asker
+    clone_memory: str | None = None    # digest of recurring themes across the workspace
     deep: bool = False                 # set when the asker explicitly wants depth
 
     def render(self) -> str:
@@ -77,6 +90,7 @@ class RuntimeContext:
         shape = DEEP_SHAPE if self.deep else SURFACE_SHAPE.get(
             self.surface, SURFACE_SHAPE["channel_mention"]
         )
+        them = self.user_name or "them"
         return (
             "## Runtime context\n\n"
             f"- **Today**: {self.today.isoformat()}\n"
@@ -88,8 +102,14 @@ class RuntimeContext:
             "Never recite placements that aren't doing work in your answer.\n\n"
             "### clone's chart\n"
             f"{self.clone_chart}\n\n"
+            "### What you remember about clone (workspace memory)\n"
+            f"{self.clone_memory or '(nothing yet)'}\n"
+            f"{CLONE_MEMORY_HINT}\n\n"
             f"### Asker: {self.user_name or 'unknown'}\n"
             f"{self.user_chart or no_chart}\n\n"
+            f"### What you remember about {them}\n"
+            f"{self.user_memory or '(nothing yet)'}\n"
+            f"{MEMORY_HINT}\n\n"
             "### Recent conversation\n"
             f"{self.thread_context or '(none)'}\n"
         )

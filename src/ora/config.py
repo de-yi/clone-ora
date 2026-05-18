@@ -35,6 +35,13 @@ ORA_TIMEZONE = os.environ.get("ORA_TIMEZONE", "Asia/Seoul")
 
 MODEL_DEFAULT = os.environ.get("ORA_MODEL_DEFAULT", "claude-sonnet-4-6")
 MODEL_DEEP = os.environ.get("ORA_MODEL_DEEP", "claude-opus-4-7")
+MODEL_DIGEST = os.environ.get("ORA_MODEL_DIGEST", "claude-haiku-4-5")
+
+# Memory: thread/DM transcript window + per-subject digest behavior.
+THREAD_HISTORY_LIMIT = int(os.environ.get("ORA_THREAD_HISTORY_LIMIT", "15"))
+DM_HISTORY_LIMIT = int(os.environ.get("ORA_DM_HISTORY_LIMIT", "20"))
+MEMORY_DEBOUNCE_SECONDS = int(os.environ.get("ORA_MEMORY_DEBOUNCE_SECONDS", "60"))
+MEMORY_READINGS_WINDOW = int(os.environ.get("ORA_MEMORY_READINGS_WINDOW", "25"))
 
 SCHEMA_PATH = REPO_ROOT / "schema.sql"
 PERSONA_PATH = REPO_ROOT / "PERSONA.md"

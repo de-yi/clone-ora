@@ -4,12 +4,14 @@ Subcommands:
   /ora              → same as /ora today
   /ora today        → today's 일진 + brief read against clone
   /ora me           → reading on the asker's chart (must have one on file)
-  /ora setup        → open birth-data modal (TODO)
+  /ora setup        → open birth-data modal
+  /ora memory       → show what ora remembers about you
+  /ora forget       → wipe what ora remembers about you
 """
 
 import logging
 
-from ora import reading, subjects
+from ora import memory, reading, subjects
 from ora.handlers import setup_modal
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,43 @@ def handle_ora_command(ack, command, client, respond):
 
     ack()
 
+    if text in ("memory", "remember", "what do you know about me"):
+        row = subjects.get_by_slack_id(user_id)
+        if not row:
+            respond(
+                response_type="ephemeral",
+                text="No chart on file, so no memory either. `/ora setup` if you want in.",
+            )
+            return
+        digest = memory.get_digest(row["id"])
+        if not digest:
+            respond(
+                response_type="ephemeral",
+                text="Nothing on you yet — we haven't talked enough. Ask me something.",
+            )
+            return
+        respond(
+            response_type="ephemeral",
+            text=f"Here's what I've got on you (private, just for me):\n\n{digest}",
+        )
+        return
+
+    if text in ("forget", "forget me"):
+        row = subjects.get_by_slack_id(user_id)
+        if not row:
+            respond(
+                response_type="ephemeral",
+                text="Nothing to forget — no chart on file.",
+            )
+            return
+        removed = memory.forget(row["id"])
+        respond(
+            response_type="ephemeral",
+            text="Wiped. Clean slate." if removed
+                 else "Nothing was on file to wipe. Already clean.",
+        )
+        return
+
     if text == "me":
         row = subjects.get_by_slack_id(user_id)
         if not row:
@@ -47,6 +86,7 @@ def handle_ora_command(ack, command, client, respond):
             surface="dm",
             slack_user_id=user_id,
             user_display_name=user_name,
+            slack_client=client,
         )
         respond(response_type="ephemeral", text=response_text)
         return
@@ -57,5 +97,6 @@ def handle_ora_command(ack, command, client, respond):
         surface="channel_mention",
         slack_user_id=user_id,
         user_display_name=user_name,
+        slack_client=client,
     )
     respond(response_type="ephemeral", text=response_text)
